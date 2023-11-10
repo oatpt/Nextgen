@@ -5,24 +5,28 @@
 DHT dht;
 //=================================================================================================
 WiFiClient   espClient;
-PubSubClient client(espClient);             //สร้างออปเจ็ค สำหรับเชื่อมต่อ mqtt
+PubSubClient client(espClient);             
 //=================================================================================================
-const char* ssid = "Oatpt";               //wifi name
-const char* password = "23456789";         //wifi password
+const char* ssid = "WIFINAME";               
+const char* password = "PASSWORD";         
 //=================================================================================================
-const char* mqtt_broker = "broker.hivemq.com";   //IP mqtt server
-const int   mqtt_port = 1883;               //port mqtt server
+const char* mqtt_broker = "broker.hivemq.com";   
+const int   mqtt_port = 1883;               
 //=================================================================================================
-const int sensor = 34; 
+const int sensor_rain = 34; 
+const int sensor_dht11 = 34; 
+const int relay_fan = 33; 
+const int relay_ligth = 32; 
+long long time_start;
 
-void setup_wifi() {   //ฟังก์ชั่นเชื่อมต่อwifi
+void setup_wifi() {   
   delay(10);
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.mode(WIFI_STA);              //เลือกโหมดรับ wifi
-  WiFi.begin(ssid, password);       //เชื่อมต่อ wifi
-  while (WiFi.status() != WL_CONNECTED)     //รอจนกว่าจะเชื่อมต่อwifiสำเร็จ
+  WiFi.mode(WIFI_STA);              
+  WiFi.begin(ssid, password);       
+  while (WiFi.status() != WL_CONNECTED)     
   {
     delay(500);
     Serial.println("Connecting to WiFi...");
@@ -39,25 +43,25 @@ void callback(char *topic, byte *payload, unsigned int length) {
     Serial.println((char*)payload);
     if(strcmp((char*)payload,"on")==0)
     {
-      digitalWrite(32,HIGH);
+      digitalWrite(relay_ligth,HIGH);
       Serial.println("high");
     }
     else 
     {
-      digitalWrite(32,LOW);
+      digitalWrite(relay_ligth,LOW);
       Serial.println("low");
     }
   }
   if(strcmp(topic,"NextGen_23/smartHome/actuator/fan")==0)
   {
-    
+    //write your code
   }
 }
 
-void reconnect() {  //ฟังก์ชั่นเชื่อมต่อmqtt
-  client.setServer(mqtt_broker, mqtt_port);   //เชื่อมต่อmqtt
-  client.setCallback(callback);               //เลือกฟังก์ชั่นsubscribe
-  while (!client.connected()) //รอจนกว่าจะเชื่อมต่อmqttสำเร็จ
+void reconnect() {  
+  client.setServer(mqtt_broker, mqtt_port);   
+  client.setCallback(callback);               
+  while (!client.connected()) 
   {
     String client_id = "esp32-client-";
     client_id += String(WiFi.macAddress());
@@ -74,43 +78,25 @@ void reconnect() {  //ฟังก์ชั่นเชื่อมต่อmqtt
 
 void setup()
 {
-  pinMode(32,OUTPUT);
-  digitalWrite(32,LOW);
+  pinMode(relay_ligth,OUTPUT);
+  digitalWrite(relay_ligth,LOW);
+  pinMode(relay_fan,OUTPUT);
+  digitalWrite(relay_fan,LOW);
   
   Serial.begin(9600);
-  dht.setup(15); 
+  dht.setup(sensor_dht11); 
   setup_wifi();
   reconnect(); 
   client.publish("NextGen_23/smartHome/sensor/rain", "false");
   client.subscribe("NextGen_23/smartHome/actuator/#");  
    
 }
-long long time_start;
 void loop()
 {
-  client.loop();//วนลูปรอsubscribe valu จาก mqtt
+  client.loop();
   if (millis() - time_start >= 1000)
   {
-    delay(dht.getMinimumSamplingPeriod());
-    double humidity = dht.getHumidity();
-    double temperature = dht.getTemperature();  
-    Serial.print(dht.getStatusString());
-    Serial.print("\t");
-    Serial.print(humidity, 1);
-    Serial.print("\t\t");
-    Serial.println(temperature, 1);
-    char text[100];
-    sprintf(text, "%.1f", 31.6);
-    client.publish("NextGen_23/smartHome/sensor/humi", text);
-    sprintf(text, "%.1f", 39.4);
-    client.publish("NextGen_23/smartHome/sensor/temp", text);
-    
-    Serial.print("rain : \t\t");
-    Serial.println(analogRead(sensor));
-    if(analogRead(sensor)<3000)
-      client.publish("NextGen_23/smartHome/sensor/rain", "true");
-    else
-      client.publish("NextGen_23/smartHome/sensor/rain", "false");
+    //write your code
     time_start = millis();
   }
  
