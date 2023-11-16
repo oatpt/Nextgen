@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "DHT.h"
+#define DHTTYPE DHT11
 
-DHT dht;
 //=================================================================================================
 WiFiClient   espClient;
 PubSubClient client(espClient);             
@@ -18,6 +18,8 @@ const int sensor_dht11 = 15;
 const int relay_fan = 33; 
 const int relay_ligth = 32; 
 long long time_start;
+
+DHT dht(sensor_dht11, DHTTYPE);
 
 void setup_wifi() {   
   delay(10);
@@ -52,10 +54,7 @@ void callback(char *topic, byte *payload, unsigned int length) {
       Serial.println("low");
     }
   }
-  if(strcmp(topic,"NextGen_23/smartHome/actuator/fan")==0)
-  {
-    //write your code
-  }
+  // your code to control fan
 }
 
 void reconnect() {  
@@ -84,19 +83,26 @@ void setup()
   digitalWrite(relay_fan,LOW);
   
   Serial.begin(9600);
-  dht.setup(sensor_dht11); 
+  dht.begin();
   setup_wifi();
   reconnect(); 
   client.publish("NextGen_23/smartHome/sensor/rain", "false");
   client.subscribe("NextGen_23/smartHome/actuator/#");  
    
 }
+
 void loop()
 {
   client.loop();
   if (millis() - time_start >= 1000)
   {
-    //write your code
+    
+    double humidity = dht.readHumidity();
+    double temperature =  dht.readTemperature();
+    Serial.print(humidity, 1);
+    Serial.print("\t\t");
+    Serial.println(temperature, 1);
+    //your code
     time_start = millis();
   }
  
