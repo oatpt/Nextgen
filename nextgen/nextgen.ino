@@ -14,7 +14,7 @@ const char* mqtt_broker = "broker.hivemq.com";
 const int   mqtt_port = 1883;               
 //=================================================================================================
 const int sensor_rain = 34; 
-const int sensor_dht11 = 34; 
+const int sensor_dht11 = 15; 
 const int relay_fan = 33; 
 const int relay_ligth = 32; 
 long long time_start;
